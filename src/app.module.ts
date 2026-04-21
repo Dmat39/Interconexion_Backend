@@ -18,6 +18,10 @@ import { CamaraVecino } from './entities/camara-vecino.entity';
 import { GrupoVisita } from './entities/grupo-visita.entity';
 import { Visita } from './entities/visita.entity';
 import { Recuperacion } from './entities/recuperacion.entity';
+import { UrbanizacionesModule } from './urbanizaciones/urbanizaciones.module';
+import { ActivasModule } from './activas/activas.module';
+import { Urbanizacion } from './entities/urbanizacion.entity';
+import { VecinalActiva } from './entities/vecinal-activa.entity';
 
 @Module({
   imports: [
@@ -29,7 +33,7 @@ import { Recuperacion } from './entities/recuperacion.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'sivi_db',
-      entities: [Usuario, Vecino, CamaraVecino, GrupoVisita, Visita, Recuperacion],
+      entities: [Usuario, Vecino, CamaraVecino, GrupoVisita, Visita, Recuperacion, Urbanizacion, VecinalActiva],
       synchronize: true,
     }),
     AuthModule,
@@ -43,6 +47,8 @@ import { Recuperacion } from './entities/recuperacion.entity';
     EstadisticasModule,
     ReportesModule,
     ConfiguracionModule,
+    UrbanizacionesModule,
+    ActivasModule,
   ],
 })
 export class AppModule {}
