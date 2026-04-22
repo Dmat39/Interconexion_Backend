@@ -1,8 +1,9 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
-  UpdateDateColumn, OneToMany,
+  UpdateDateColumn, OneToMany, ManyToOne, JoinColumn,
 } from 'typeorm';
 import { Visita } from './visita.entity';
+import { Urbanizacion } from './urbanizacion.entity';
 
 export enum EstadoGrupo {
   PENDIENTE = 'PENDIENTE',
@@ -32,6 +33,13 @@ export class GrupoVisita {
 
   @Column({ nullable: true })
   observaciones: string;
+
+  @Column({ nullable: true })
+  urbanizacion_id: string;
+
+  @ManyToOne(() => Urbanizacion, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'urbanizacion_id' })
+  urbanizacion: Urbanizacion;
 
   @OneToMany(() => Visita, (v) => v.grupo)
   visitas: Visita[];

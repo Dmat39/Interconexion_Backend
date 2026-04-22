@@ -17,7 +17,8 @@ export class GruposService {
     const { fecha, tecnico, estado } = query;
     const qb = this.grupoRepo.createQueryBuilder('g')
       .leftJoinAndSelect('g.visitas', 'v')
-      .leftJoinAndSelect('v.vecino', 'vec');
+      .leftJoinAndSelect('v.vecino', 'vec')
+      .leftJoinAndSelect('g.urbanizacion', 'urb');
     if (fecha) qb.andWhere('g.fecha = :fecha', { fecha });
     if (tecnico) qb.andWhere('g.tecnico ILIKE :tecnico', { tecnico: `%${tecnico}%` });
     if (estado) qb.andWhere('g.estado = :estado', { estado });
@@ -29,7 +30,7 @@ export class GruposService {
     const hoy = new Date().toISOString().split('T')[0];
     return this.grupoRepo.find({
       where: { fecha: hoy },
-      relations: ['visitas', 'visitas.vecino'],
+      relations: ['visitas', 'visitas.vecino', 'urbanizacion'],
       order: { created_at: 'ASC' },
     });
   }
@@ -37,19 +38,28 @@ export class GruposService {
   async findOne(id: string) {
     const g = await this.grupoRepo.findOne({
       where: { id },
-      relations: ['visitas', 'visitas.vecino', 'visitas.vecino.camaras'],
+      relations: ['visitas', 'visitas.vecino', 'visitas.vecino.camaras', 'urbanizacion'],
     });
     if (!g) throw new NotFoundException('Grupo no encontrado');
     return g;
   }
 
-  async create(dto: { nombre: string; tecnico: string; fecha: string; sector?: string; observaciones?: string; vecino_ids: { id: string; orden: number }[] }) {
+  async create(dto: {
+    nombre: string;
+    tecnico: string;
+    fecha: string;
+    sector?: string;
+    observaciones?: string;
+    urbanizacion_id?: string;
+    vecino_ids: { id: string; orden: number }[];
+  }) {
     const grupo = this.grupoRepo.create({
       nombre: dto.nombre,
       tecnico: dto.tecnico,
       fecha: dto.fecha,
       sector: dto.sector,
       observaciones: dto.observaciones,
+      urbanizacion_id: dto.urbanizacion_id || null,
     });
     const savedGrupo = await this.grupoRepo.save(grupo);
 
