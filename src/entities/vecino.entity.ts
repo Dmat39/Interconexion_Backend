@@ -1,10 +1,11 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
-  UpdateDateColumn, OneToMany,
+  UpdateDateColumn, OneToMany, ManyToMany,
 } from 'typeorm';
 import { CamaraVecino } from './camara-vecino.entity';
 import { Visita } from './visita.entity';
 import { Recuperacion } from './recuperacion.entity';
+import { Urbanizacion } from './urbanizacion.entity';
 
 export enum EstadoVecino {
   CITA = 'CITA',
@@ -86,6 +87,9 @@ export class Vecino {
 
   @OneToMany(() => Recuperacion, (r) => r.vecino)
   recuperaciones: Recuperacion[];
+
+  @ManyToMany(() => Urbanizacion, (u) => u.vecinos)
+  urbanizaciones: Urbanizacion[];
 
   @CreateDateColumn()
   created_at: Date;

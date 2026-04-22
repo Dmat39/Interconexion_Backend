@@ -7,7 +7,6 @@ import { CamarasModule } from './camaras/camaras.module';
 import { GruposModule } from './grupos/grupos.module';
 import { VisitasModule } from './visitas/visitas.module';
 import { RecuperacionesModule } from './recuperaciones/recuperaciones.module';
-import { ImportModule } from './import/import.module';
 import { MapaModule } from './mapa/mapa.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
 import { ReportesModule } from './reportes/reportes.module';
@@ -42,7 +41,6 @@ import { VecinalActiva } from './entities/vecinal-activa.entity';
     GruposModule,
     VisitasModule,
     RecuperacionesModule,
-    ImportModule,
     MapaModule,
     EstadisticasModule,
     ReportesModule,
