@@ -18,7 +18,7 @@ export class Urbanizacion {
   @Column({ nullable: true })
   descripcion: string;
 
-  @ManyToMany(() => Vecino)
+  @ManyToMany(() => Vecino, (v) => v.urbanizaciones)
   @JoinTable({
     name: 'urbanizacion_vecinos',
     joinColumn: { name: 'urbanizacion_id' },

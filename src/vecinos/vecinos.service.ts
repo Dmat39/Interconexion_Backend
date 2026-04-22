@@ -3,19 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Vecino } from '../entities/vecino.entity';
 import { CamaraVecino } from '../entities/camara-vecino.entity';
+import { Urbanizacion } from '../entities/urbanizacion.entity';
 
 @Injectable()
 export class VecinosService {
   constructor(
     @InjectRepository(Vecino) private repo: Repository<Vecino>,
     @InjectRepository(CamaraVecino) private camaraRepo: Repository<CamaraVecino>,
+    @InjectRepository(Urbanizacion) private urbanizacionRepo: Repository<Urbanizacion>,
   ) {}
 
   async findAll(query: any) {
     const { estado, sector, gestor, buscar, page = 1, limit = 20 } = query;
     const p = Number(page), l = Number(limit);
 
-    // Paso 1: paginación sin join (evita bug de TypeORM con skip/take + leftJoin)
     const qb = this.repo.createQueryBuilder('v');
     if (estado) qb.andWhere('v.estado = :estado', { estado });
     if (sector) qb.andWhere('v.sector = :sector', { sector });
@@ -34,9 +35,10 @@ export class VecinosService {
       .take(l)
       .getMany();
 
-    // Paso 2: cargar cámaras por IDs (query separada, sin problema de paginación)
     if (data.length > 0) {
       const ids = data.map(v => v.id);
+
+      // Cargar cámaras
       const camaras = await this.camaraRepo.find({ where: { vecino_id: In(ids) } });
       const camaraMap = new Map<string, CamaraVecino[]>();
       for (const c of camaras) {
@@ -44,6 +46,22 @@ export class VecinosService {
         camaraMap.get(c.vecino_id)!.push(c);
       }
       for (const v of data) v.camaras = camaraMap.get(v.id) || [];
+
+      // Cargar urbanizaciones
+      const urbs = await this.urbanizacionRepo
+        .createQueryBuilder('u')
+        .innerJoin('u.vecinos', 'v', 'v.id IN (:...ids)', { ids })
+        .select(['u.id', 'u.nombre', 'u.sector'])
+        .addSelect('v.id', 'vecino_id')
+        .getRawMany();
+
+      const urbMap = new Map<string, { id: string; nombre: string; sector: string }[]>();
+      for (const u of urbs) {
+        const vid = u.vecino_id;
+        if (!urbMap.has(vid)) urbMap.set(vid, []);
+        urbMap.get(vid)!.push({ id: u.u_id, nombre: u.u_nombre, sector: u.u_sector });
+      }
+      for (const v of data) (v as any).urbanizaciones = urbMap.get(v.id) || [];
     }
 
     return { data, total, page: p, limit: l, pages: Math.ceil(total / l) };
@@ -52,7 +70,7 @@ export class VecinosService {
   async findOne(id: string) {
     const v = await this.repo.findOne({
       where: { id },
-      relations: ['camaras', 'visitas', 'visitas.grupo'],
+      relations: ['camaras', 'visitas', 'visitas.grupo', 'urbanizaciones'],
     });
     if (!v) throw new NotFoundException('Vecino no encontrado');
     return v;
@@ -79,6 +97,6 @@ export class VecinosService {
       .select('DISTINCT v.sector', 'sector')
       .where('v.sector IS NOT NULL')
       .getRawMany();
-    return result.map((r) => r.sector).filter(Boolean);
+    return result.map(r => r.sector).filter(Boolean);
   }
 }

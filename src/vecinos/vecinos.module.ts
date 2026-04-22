@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VecinosController } from './vecinos.controller';
-import { VecinosService } from './vecinos.service';
 import { Vecino } from '../entities/vecino.entity';
 import { CamaraVecino } from '../entities/camara-vecino.entity';
-import { Visita } from '../entities/visita.entity';
+import { Urbanizacion } from '../entities/urbanizacion.entity';
+import { VecinosService } from './vecinos.service';
+import { VecinosController } from './vecinos.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vecino, CamaraVecino, Visita])],
+  imports: [TypeOrmModule.forFeature([Vecino, CamaraVecino, Urbanizacion])],
   controllers: [VecinosController],
   providers: [VecinosService],
   exports: [VecinosService],
